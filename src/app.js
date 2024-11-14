@@ -4,6 +4,7 @@ const cors = require('cors');
 const JSend = require('./jsend');
 const contactsRouter = require('./routes/contacts.router');
 const authRouter = require('./routes/auth.router');
+const taskRouter = require('./routes/task.router'); // Import task router
 const {
     resourceNotFound,
     handleError,
@@ -23,9 +24,9 @@ app.get('/', (req, res) => {
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use('/public', express.static('public'));
 
-// Thay vì `app.use(authRouter);` hoặc `app.use(contactsRouter);`, bạn gọi `setup` như sau:
-// contactsRouter.setup(app);
+// Thiết lập các router\
 authRouter.setup(app);
+taskRouter.setup(app); // Đăng ký task router
 
 // Handle 404 response
 app.use(resourceNotFound);
