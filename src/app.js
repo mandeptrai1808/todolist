@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 
 const JSend = require('./jsend');
-const contactsRouter = require('./routes/contacts.router');
 const authRouter = require('./routes/auth.router');
 const taskRouter = require('./routes/task.router'); // Import task router
 const {
