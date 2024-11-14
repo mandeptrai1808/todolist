@@ -1,4 +1,4 @@
-# contactbook-api
+# todolist-api
 
 API backend for the contactbook application.
 
