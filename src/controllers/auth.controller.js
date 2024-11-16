@@ -17,6 +17,7 @@ exports.register = async (req, res) => {
   
   // Đăng nhập người dùng
   exports.login = async (req, res) => {
+    console.log('handleLogin called'); // Thông báo kiểm tra
     const { email, password } = req.body;
     try {
       const user = await knex('users').where({ email }).first();
@@ -38,7 +39,7 @@ exports.register = async (req, res) => {
       if (!user) {
         return res.status(404).json({ message: 'User not found.' });
       }
-      res.json({ user: { id: user.id, username: user.username, email: user.email, role: user.role } });
+      res.json({ data: { id: user.id, username: user.username, email: user.email, role: user.role } });
     } catch (error) {
       res.status(500).json({ message: 'Error fetching user info', error });
     }
@@ -48,23 +49,40 @@ exports.register = async (req, res) => {
 exports.getAllUsers = async (req, res) => {
   try {
     const users = await knex('users').select('id', 'username', 'email', 'role', 'created_at');
-    res.json({ users });
+    res.json({ data: users });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching users list', error });
   }
 };
 
-// Cập nhật thông tin người dùng (chỉ dành cho admin)
+
+// Cập nhật thông tin người dùng (cho phép cả admin và người dùng thường)
 exports.updateUser = async (req, res) => {
   const { id } = req.params;
   const { username, email, role } = req.body;
+
   try {
-    await knex('users').where({ id }).update({ username, email, role });
-    res.json({ message: 'User updated successfully' });
+    if (req.user.role !== 'admin' && req.user.id !== parseInt(id)) {
+      return res.status(403).json({ message: 'You are not allowed to update this user.' });
+    }
+
+    const updateData = req.user.role === 'admin' 
+      ? { username, email, role }
+      : { username, email };
+
+    // Thực hiện cập nhật trong database
+    await knex('users').where({ id }).update(updateData);
+
+    // Lấy thông tin mới sau khi cập nhật
+    const updatedUser = await knex('users').where({ id }).first();
+
+    res.json({ message: 'User updated successfully', data: updatedUser });
   } catch (error) {
     res.status(500).json({ message: 'Error updating user', error });
   }
 };
+
+
 
 // Xóa người dùng (chỉ dành cho admin)
 exports.deleteUser = async (req, res) => {
@@ -86,5 +104,30 @@ exports.createUser = async (req, res) => {
     res.status(201).json({ message: 'User created successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error creating user', error });
+  }
+};
+
+exports.updateUserById = async (req, res) => {
+  const { id } = req.params; // Lấy ID từ URL
+  const { username, email, role, password } = req.body; // Lấy dữ liệu từ body
+
+  try {
+    const updatedData = { username, email, role };
+
+    // Nếu có password, hash lại trước khi lưu
+    if (password) {
+      updatedData.password = await bcrypt.hash(password, 10);
+    }
+
+    // Cập nhật user
+    const result = await knex('users').where({ id }).update(updatedData);
+
+    if (result === 0) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    res.json({ message: 'User updated successfully.' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating user', error });
   }
 };

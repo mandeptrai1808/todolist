@@ -4,7 +4,7 @@ const knex = require('../database/knex');
 exports.getAllTasks = async (req, res) => {
   try {
     const tasks = await knex('tasks').select('*');
-    res.json({ tasks });
+    res.json({ data: tasks });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching tasks', error });
   }
@@ -73,7 +73,7 @@ exports.getTasksByUserId = async (req, res) => {
   
     try {
       const tasks = await knex('tasks').where({ user_id }).select('*');
-      res.json({ tasks });
+      res.json({ data: tasks });
     } catch (error) {
       res.status(500).json({ message: 'Error fetching user tasks', error });
     }

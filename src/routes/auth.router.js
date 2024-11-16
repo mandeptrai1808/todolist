@@ -97,7 +97,7 @@ module.exports.setup = (app) => {
      *       403:
      *         description: Access denied
      */
-    router.get('/admin/users', authenticate, isAdmin, authController.getAllUsers);
+    router.get('/admin/users', authenticate, authController.getAllUsers);
 
     /**
      * @swagger
@@ -122,7 +122,7 @@ module.exports.setup = (app) => {
      *       404:
      *         description: User not found
      */
-    router.delete('/admin/users/:id', authenticate, isAdmin, authController.deleteUser);
+    router.delete('/admin/users/:id', authenticate, authController.deleteUser);
 
     // Cập nhật thông tin người dùng theo ID (dành cho admin)
     /**
@@ -162,8 +162,9 @@ module.exports.setup = (app) => {
      *       404:
      *         description: User not found
      */
-    router.put('/admin/users/:id', authenticate, isAdmin, authController.updateUser);
+    router.put('/admin/users/:id', authenticate, authController.updateUser);
 
+    router.put('/admin/usersbyid/:id', authenticate, authController.updateUserById);
 
     // Cấm các phương thức khác
     router.all('*', (req, res) => {
