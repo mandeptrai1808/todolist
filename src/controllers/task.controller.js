@@ -22,6 +22,8 @@ exports.createTask = async (req, res) => {
         priority,
         user_id, 
       });
+
+      console.log(taskId)
   
       const task = await knex('tasks').where({ id: taskId }).first();
       res.status(201).json({ task });

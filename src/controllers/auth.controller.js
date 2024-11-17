@@ -7,8 +7,8 @@ const { JWT_SECRET } = process.env;
 exports.register = async (req, res) => {
     const { username, email, password } = req.body;
     try {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      await knex('users').insert({ username, email, password: hashedPassword });
+      
+      await knex('users').insert({ username, email, password });
       res.status(201).json({ message: 'User registered successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Error registering user', error });
@@ -21,7 +21,8 @@ exports.register = async (req, res) => {
     const { email, password } = req.body;
     try {
       const user = await knex('users').where({ email }).first();
-      if (!user || !(await bcrypt.compare(password, user.password))) {
+      console.log(user)
+      if (!user || user.password !== password) {
         return res.status(401).json({ message: 'Invalid email or password.' });
       }
       const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1d' });
